@@ -2,16 +2,25 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ES2020",
-    "lib": ["ESNext", "DOM"],
-    "strict": true,
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
-    "paths": {
-      "*": ["node_modules/*"]
-    }
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
   },
-  "include": ["packages/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "packages/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
