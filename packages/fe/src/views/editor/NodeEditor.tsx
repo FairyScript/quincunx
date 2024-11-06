@@ -1,5 +1,5 @@
 import { AppShell, Group } from '@mantine/core'
-import { ReactFlow } from '@xyflow/react'
+import { Background, BackgroundVariant, Controls, MiniMap, ReactFlow } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 
 const initialNodes = [
@@ -18,7 +18,11 @@ const NodeEditor: React.FC = () => {
       </AppShell.Header>
 
       <AppShell.Main h="100dvh">
-        <ReactFlow nodes={initialNodes} edges={initialEdges} />
+        <ReactFlow nodes={initialNodes} edges={initialEdges}>
+          <Controls />
+          <MiniMap />
+          <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
+        </ReactFlow>
       </AppShell.Main>
     </AppShell>
   )
