@@ -1,0 +1,11 @@
+{
+  "name": "quincunx-core",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {},
+  "dependencies": {
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {}
+}
