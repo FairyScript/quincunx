@@ -1,42 +1,68 @@
-import { msgBus$ } from '../../message/msgBus'
+import { z } from 'zod'
+import { sendMsg } from '../../message/msgBus'
 
-interface TimerConfig {
-  interval: number
+interface OperatorConfig<T extends z.ZodObject<any>> {
+  id: string
+  name: string
+  category: string
+  scheme: T
 }
 
-const defaultConfig: TimerConfig = {
-  interval: 1000,
+const config: OperatorConfig = {
+  id: 'timer-1',
+  name: 'Timer',
+  category: 'Operators', //用于分类，仅限前端使用
+  scheme: z.object({
+    input: z.object({}),
+    output: z.object({
+      timestamp: z.number().default(0),
+    }),
+  }),
 }
 
-interface Port {
-  type: string
-}
+type TimerConfig = typeof config
 
-interface Operator {
-  inputs: Record<string, Port>
-  outputs: Record<string, Port>
-  start(): void
-}
+class Operator<T extends TimerConfig> {
+  private config: T
 
-class Timer implements Operator {
-  static inputs = {}
-  static outputs = {
-    timestamp: { type: 'number' },
+  private inputData: z.infer<T['scheme']['shape']['input']>
+  // 只写不读
+  private outputData: any
+
+  constructor(config: T) {
+    this.config = config
+    //init data
+    const inputData = config.scheme.shape.input.parse({})
+    this.inputData = new Proxy(inputData, {
+      set: (target, key, value) => {
+        //@ts-expect-error
+        target[key] = value
+        this.onInputDataChange()
+        return value
+      },
+    })
+
+    const outputData = {}
+    this.outputData = new Proxy(outputData, {
+      set: (target, key, value) => {
+        //@ts-expect-error
+        target[key] = value
+        this.onOutputDataChange(key, value)
+        return value
+      },
+    })
   }
 
-  private interval: number
-
-  constructor(config: TimerConfig = defaultConfig) {
-    this.interval = config.interval
-  }
-
-  start() {
-    setInterval(() => {
-      msgBus$.next({
-        id: 'timer',
-        port: 'timestamp',
-        data: Date.now(),
-      })
-    }, this.interval)
+  async start() {}
+  //输入数据变化
+  async onInputDataChange() {}
+  //输出数据变化
+  async onOutputDataChange(key: string | symbol, value: any) {
+    //发送消息
+    sendMsg({
+      id: this.config.id,
+      port: key,
+      data: value,
+    })
   }
 }
