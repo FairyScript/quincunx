@@ -1,9 +1,10 @@
-import { Subject } from 'rxjs'
+import { filter, Subject } from 'rxjs'
 
 interface OperatorMessage {
   id: string
   port: string
   data: any
+  type: 'input' | 'output'
 }
 
 interface Edge {
@@ -16,18 +17,20 @@ interface Edge {
 type DataAddress = Omit<OperatorMessage, 'data'>
 
 export class DataHub {
+  //output -> input[]
   dataMap: Record<string, Record<string, DataAddress>> = {}
   constructor(edges: Edge[]) {
     for (const edge of edges) {
-      if (!this.dataMap[edge.source]) {
-        this.dataMap[edge.source] = {}
+      const sAddr = `${edge.source}:${edge.sourceHandle}`
+      const tAddr = `${edge.target}:${edge.targetHandle}`
+      if (!this.dataMap[sAddr]) {
+        this.dataMap[sAddr] = {}
       }
-      if (!this.dataMap[edge.target]) {
-        this.dataMap[edge.target] = {}
-      }
-      this.dataMap[edge.source][edge.sourceHandle] = {
+
+      this.dataMap[sAddr][tAddr] = {
         id: edge.target,
         port: edge.targetHandle,
+        type: 'input',
       }
     }
 
@@ -35,14 +38,12 @@ export class DataHub {
   }
 
   forward() {
-    msgBus$.subscribe(data => {
-      const target = this.dataMap[data.id][data.port]
-      if (target) {
-        sendMsg({
-          id: target.id,
-          port: target.port,
-          data: data.data,
-        })
+    msgBus$.pipe(filter(msg => msg.type === 'output')).subscribe(msg => {
+      const addr = `${msg.id}:${msg.port}`
+      const targets = this.dataMap[addr]
+      if (!targets) return
+      for (const target of Object.values(targets)) {
+        msgBus$.next({ ...target, data: msg.data })
       }
     })
   }

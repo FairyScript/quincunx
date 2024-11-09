@@ -1,28 +1,35 @@
 import { z } from 'zod'
-import { sendMsg } from '../../message/msgBus'
+import { msgBus$, sendMsg } from '../../message/msgBus'
+import { filter, Subscription } from 'rxjs'
 
-export interface OperatorConfig<T extends z.ZodObject<any>> {
-  id: string
-  name: string
+export interface PNodeScheme {
+  inputs: z.ZodObject<any>
+  outputs: z.ZodObject<any>
+  options: z.ZodObject<any>
+}
+
+export interface PNodeConfig<T extends PNodeScheme> {
+  type: string
   category: string
   scheme: T
 }
 
-export class Operator<T extends OperatorConfig<z.ZodObject<any>>> {
-  private config: T
+export class ProcessNode<Config extends PNodeConfig<PNodeScheme>> {
+  id: string
+  inputData: z.infer<Config['scheme']['inputs']>
+  outputData: z.infer<Config['scheme']['outputs']>
+  options: z.infer<Config['scheme']['options']>
 
-  inputData: z.infer<T['scheme']['shape']['input']>
-  // 只写不读
-  outputData: z.infer<T['scheme']['shape']['output']>
-
-  constructor(config: T) {
-    this.config = config
+  constructor(id: string, config: Config) {
+    this.options = config
+    this.id = id
     //init data
-    const inputData = config.scheme.shape.input.parse({})
+    const inputData = config.scheme.inputs.parse({})
     this.inputData = new Proxy(inputData, {
       set: (target, key, value) => {
+        //@ts-expect-error
         target[key] = value
-        this.onInputDataChange()
+        this.onInputDataChange?.()
         return value
       },
     })
@@ -32,22 +39,43 @@ export class Operator<T extends OperatorConfig<z.ZodObject<any>>> {
       set: (target, key, value) => {
         //@ts-expect-error
         target[key] = value
-        this.onOutputDataChange(key as string, value)
+        this.postChange(key as string, value)
         return value
       },
     })
+
+    this.listen()
   }
 
   async start() {}
-  //输入数据变化
   async onInputDataChange() {}
+  async onOptionsChange() {}
+
+  subHandle?: Subscription
+  listen() {
+    if (this.subHandle) {
+      this.subHandle.unsubscribe()
+    }
+
+    this.subHandle = msgBus$
+      .pipe(filter(msg => msg.id === this.id && msg.type === 'input'))
+      .subscribe(msg => {
+        //@ts-expect-error
+        this.inputData[msg.port] = msg.data
+      })
+  }
   //输出数据变化
-  async onOutputDataChange(key: string, value: any) {
+  postChange(key: string, value: any) {
     //发送消息
     sendMsg({
-      id: this.config.id,
+      id: this.id,
       port: key,
       data: value,
+      type: 'output',
     })
+  }
+
+  destroy() {
+    this.subHandle?.unsubscribe()
   }
 }

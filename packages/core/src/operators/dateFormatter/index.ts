@@ -1,31 +1,35 @@
 import { z } from 'zod'
-import { Operator } from '../base'
+import { ProcessNode } from '../base'
 
-const config = {
-  id: 'date_formatter_1',
-  name: 'Date Formatter',
-  category: 'Operators', //用于分类，仅限前端使用
-  scheme: z.object({
-    input: z.object({
-      timestamp: z.number().default(0),
-    }),
-    output: z.object({
-      timeStr: z.string().default(''),
-    }),
+const scheme = {
+  inputs: z.object({
+    timestamp: z.number().optional(),
   }),
+  outputs: z.object({
+    timeStr: z.string().default(''),
+  }),
+  options: z.object({}),
+}
+const config = {
+  type: 'DateFormatter',
+  category: 'Operators', //用于分类，仅限前端使用
+  scheme,
 }
 
-type TimerConfig = typeof config
+type Config = typeof config
+type Option = z.infer<Config['scheme']['options']> | undefined
 
-export class DateFormatter extends Operator<TimerConfig> {
-  constructor() {
-    super(config)
+export class DateFormatter extends ProcessNode<Config> {
+  option: Option
+
+  constructor(id: string, op: Option) {
+    super(id, config)
+    this.option = scheme.options.parse(op ?? {})
   }
 
   async onInputDataChange() {
-    console.log('DateFormatter onInputDataChange');
-    
     const timestamp = this.inputData.timestamp
+    if (!timestamp) return
     this.outputData.timeStr = new Date(timestamp).toLocaleString()
   }
 }
