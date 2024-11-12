@@ -1,5 +1,7 @@
-import { DataHub, msgBus$, ProcessNode } from 'quincunx-core'
+import { ProcessNode } from 'quincunx-core'
 import { DateFormatter, TimerNode } from 'quincunx-operators'
+import { DataHub, msgBus$ } from './msgBus'
+import { filter, Subscription } from 'rxjs'
 msgBus$.subscribe(msg => {
   console.log(msg)
 })
@@ -40,10 +42,33 @@ const nodeMap: Record<string, typeof ProcessNode<any>> = {
 class NodeHost {
   nodes: Record<string, ProcessNode<any>> = {}
 
+  constructor() {
+    this.listen()
+  }
+
+  subHandle?: Subscription
+  listen() {
+    if (this.subHandle) {
+      this.subHandle.unsubscribe()
+    }
+
+    this.subHandle = msgBus$
+      .pipe(filter(msg => msg.type === 'input'))
+      .subscribe(msg => {
+        const node = this.nodes[msg.id]
+        if (!node) return
+        node.inputData[msg.port] = msg.data
+      })
+  }
+
   loadNodes(nodes: Node[]) {
     for (const node of nodes) {
       const NodeComp = nodeMap[node.type]
-      this.nodes[node.id] = new NodeComp(node.id, node.data)
+      const nodeInstance = new NodeComp(node.id, node.data)
+      nodeInstance.postChange = (key, value) => {
+        msgBus$.next({ id: node.id, port: key, data: value, type: 'output' })
+      }
+      this.nodes[node.id] = nodeInstance
     }
   }
 
