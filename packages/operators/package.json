@@ -1,5 +1,5 @@
 {
-  "name": "quincunx-core",
+  "name": "quincunx-operators",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,8 +7,12 @@
   "scripts": {},
   "dependencies": {
     "nanoid": "^5.0.8",
+    "quincunx-core": "workspace:*",
     "rxjs": "^7.8.1",
     "zod": "^3.23.8"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "workspaces": [
+    "packages/*"
+  ]
 }

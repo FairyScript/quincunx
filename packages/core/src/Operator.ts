@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { msgBus$, sendMsg } from '../../message/msgBus'
+import { msgBus$, sendMsg } from './msgBus'
 import { filter, Subscription } from 'rxjs'
 
 export interface PNodeScheme {

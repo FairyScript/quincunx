@@ -1,26 +1,40 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "lib": [
       "ESNext",
       "DOM"
     ],
+    "types": [
+      "bun-types"
+    ],
+    // Enable modern features
+    "useDefineForClassFields": true,
+    "allowJs": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    /* Linting */
+    // Linting
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    // Monorepo settings
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
   },
   "include": [
     "packages/**/*"
   ],
   "exclude": [
     "node_modules",
-    "dist"
-  ]
+    "dist",
+    "**/*.config.mjs",
+    "**/*.config.cjs"
+  ],
 }

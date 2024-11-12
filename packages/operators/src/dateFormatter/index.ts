@@ -1,5 +1,5 @@
+import { ProcessNode } from 'quincunx-core'
 import { z } from 'zod'
-import { ProcessNode } from '../base'
 
 const scheme = {
   inputs: z.object({
