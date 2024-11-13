@@ -29,7 +29,7 @@ export class TimerNode extends ProcessNode<Config> {
 
   private handle: Timer | null = null
 
-  async start() {
+  onStart() {
     this.create()
   }
 

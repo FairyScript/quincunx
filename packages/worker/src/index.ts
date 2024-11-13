@@ -74,7 +74,7 @@ class NodeHost {
 
   startAll() {
     for (const key in this.nodes) {
-      this.nodes[key].start()
+      this.nodes[key].onStart?.()
     }
   }
 }

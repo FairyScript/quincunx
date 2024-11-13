@@ -10,13 +10,6 @@ export interface PNodeConfig<T extends PNodeScheme> {
   type: string
   category: string
   scheme: T
-
-  start?: () => void
-  onInputDataChange?: () => void
-  onOptionsChange?: () => void
-
-  //输出数据变化
-  postChange: (key: string, value: any) => void
 }
 
 export class ProcessNode<Config extends PNodeConfig<PNodeScheme>> {
@@ -49,4 +42,14 @@ export class ProcessNode<Config extends PNodeConfig<PNodeScheme>> {
       },
     })
   }
+
+  //输出数据变化
+  // 由NodeHost覆盖实现
+  postChange(key: string, value: any) {
+    console.log('postChange', key, value)
+  }
+
+  onStart() {}
+  onInputDataChange() {}
+  onOptionsChange() {}
 }
