@@ -3,17 +3,17 @@
   "workspaces": {
     "": {
       "dependencies": {
-        "@module-federation/enhanced": "^0.7.2",
+        "@module-federation/enhanced": "^0.7.7",
         "rxjs": "^7.8.1",
-        "zod": "^3.23.8",
+        "zod": "^3.24.1",
       },
       "devDependencies": {
         "@biomejs/biome": "^1.9.4",
         "@types/bun": "latest",
-        "husky": "^9.1.6",
-        "lint-staged": "^15.2.10",
-        "prettier": "^3.3.3",
-        "typescript": "^5.6.3",
+        "husky": "^9.1.7",
+        "lint-staged": "^15.3.0",
+        "prettier": "^3.4.2",
+        "typescript": "^5.7.2",
       },
     },
     "packages/core": {
